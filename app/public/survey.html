@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Friend Finder</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="jumbotron">
+      <h1 class="text-center"><span class="glyphicon glyphicon-glass"></span>Friend Finder</h1>
+      <a href="/"><h5 class="text-center">i changed my mind, take me back</h5></a>
+    </div>
+
+    <div class="row">
+      <h4>Answer each prompt with:</h4>
+      <h4>1: strongly disagree</h4>
+      <h4>2: disagree</h4>
+      <h4>3: neutral</h4>
+      <h4>4: agree</h4>
+      <h4>5: strongly agree</h4>
+      <br>
+      
+      <form>
+        <h5>Name:</h5>
+        <input id="namehere"></input>
+        <h5>Photo Link:</h5>
+        <input id="photohere"</input>
+        <h5>Use http://www.barrierbreakers.co.uk/wp-content/uploads/2013/04/Smiley-face-200x200.jpg if you can't think of one</h5><br>
+        <div id="questionshere">
+        </div><br>
+        <button id="submit">Submit</button>
+      </form>
+
+      <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">We Found a Match!</h4>
+            </div>
+            <div class="modal-body">
+              <p id="modalname"></p>
+              <img id="modalphoto">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    var questions = [
+      "you like kittens",
+      "pineapple on pizza",
+      "The matrix was a good movie",
+      "candy is a drug",
+      "long walks on the beach",
+      "cuddles are great",
+      "sports are cool",
+      "traveling is fun",
+      "you act on impulse",
+      "you are adventurous"
+    ];
+
+    questions.forEach(function(e, i) {
+      var newDiv = $("<div>").attr("class", "form-group");
+      var label = $("<label>").text(e);
+      var select = $("<select>").attr("class", "form-control").attr("id", "sel" + (i + 1))
+        for(var i = 1; i <= 5; i++) {
+          select.append($("<option>").text(i))  
+        }
+
+      newDiv.append(label, select)
+      $("#questionshere").append(newDiv);
+    })
+
+    $("#submit").on("click", function(event) {
+      event.preventDefault();
+
+      var name = $("#namehere").val().trim();
+      var photo = $("#photohere").val().trim();
+
+      var scores = [];
+      for(var i = 1; i < questions.length + 1; i++) {
+        var temp = $("#sel" + i).val();
+        scores.push(temp);
+      }
+    
+      var profile = {
+        name: name,
+        photo: photo,
+        scores: scores
+      }
+
+      $.post("/api/friends", profile
+        ).done(function(data) {
+          $("#modalname").text(data.name);
+          $("#modalphoto").attr("src", data.photo)
+          $("#myModal").modal();
+      })
+    })
+
+
+    $('#myModal').on('hidden.bs.modal', function() {
+      location.reload();
+      window.scrollTo(0, 0);
+    })
+
+  </script>
+</body>
+</html>
